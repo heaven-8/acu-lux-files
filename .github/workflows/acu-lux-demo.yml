@@ -1,0 +1,36 @@
+name: publish acu-lux demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - acu-lux/version.txt
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          echo "VERSION=$(tr -d '[:space:]' < acu-lux/version.txt)"
+          echo "VERSION=$(tr -d '[:space:]' < acu-lux/version.txt)" >> "$GITHUB_ENV"
+          test -s acu-lux/AcuLux-Server-Demo.dmg
+          test -s acu-lux/AcuLux-Client-Demo.dmg
+
+      - name: Upload DMGs to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "acu-lux-${{ env.VERSION }}"
+          name: "AcuLux demo ${{ env.VERSION }}"
+          files: |
+            acu-lux/AcuLux-Server-Demo.dmg
+            acu-lux/AcuLux-Client-Demo.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
